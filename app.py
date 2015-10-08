@@ -43,7 +43,7 @@ def search_all(text):
     else:
         index = get_data.loadIndexRsr(path)
         rsrs = get_data.searchIndex(index, text)
-        res = get_data.graphRsrPrj(rsrs)
+        res = get_data.graphRsrPrj(path, rsrs)
         get_data.tblRsrPrjGraphCache.insert({'query': text, 'res':res})
         graph = res
 
@@ -66,7 +66,7 @@ def rsr_prj_graph(text):
     else:
         index = get_data.loadIndexRsr(path)
         rsrs = get_data.searchIndex(index, text)
-        res = get_data.graphRsrPrj(rsrs)
+        res = get_data.graphRsrPrj(path, rsrs)
         get_data.tblRsrPrjGraphCache.insert({'query': text, 'res':res})
         return json.dumps(res)
 

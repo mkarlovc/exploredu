@@ -653,8 +653,8 @@ def getCache(tbl, text):
 ########################
 
 # Create graph based on subset of researchers
-def graphRsrPrj(rsrs):
-    index = loadIndexRsrRsr()
+def graphRsrPrj(path, rsrs):
+    index = loadIndexRsrRsr(path)
     ids = []
     nodes = []
     for i,rsr in enumerate(rsrs):
