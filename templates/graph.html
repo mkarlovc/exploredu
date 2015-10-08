@@ -1,0 +1,19 @@
+<html>
+<head>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+   <script type=text/javascript src="static/js/sigma/sigma.min.js"></script>
+   <script type=text/javascript src="static/js/sigma/sigma.forceatlas2.js"></script>
+   <script type=text/javascript src="static/js/graph.js?8"></script>
+   <script>
+       function myfunction() {
+           $.get("http://95.87.154.208:8080/api/all/"+$("#in").val(), function(data, status){
+               drawGraph1(data.graph);
+           }, "json");
+       }
+   </script>
+</head>
+<body>
+    <input type="text" name="lname" value="graph theory" id="in"><button id="in" onclick="myfunction()">submit</button>
+    <div id="graph" style="width:600px; height:400px"></div>
+<body>
+</html>
