@@ -16,6 +16,7 @@ import json
 import re
 from itertools import islice
 from random import randint
+from EventRegistry.EventRegistry import *
 
 # Set main data path
 path = "/home/luis/data/mario/openedu/"
@@ -26,6 +27,7 @@ dbVideoLectures = TinyDB(path+'tinydb/videolectures.json')
 dbNets = TinyDB(path+'tinydb/nets.json')
 dbSicrisConn = TinyDB(path+'tinydb/conn.json')
 dbCach = TinyDB(path+'tinydb/cach.json')
+dbER = TinyDB(path+'tinydb/er.json')
 
 # Tables
 # --- sicris
@@ -42,6 +44,8 @@ tblRsrPrjColl = dbNets.table("rsr_prj_coll_net")
 tblRsrPrjCollW = dbNets.table("rsr_prj_coll_net_w")
 # --- cache
 tblRsrPrjGraphCache = dbCach.table("rsr_prj_graph")
+# --- events
+tblEvents = dbER.table("events")
 
 # from sorted dict to dict
 def to_dict(input_ordered_dict):
@@ -373,7 +377,7 @@ def getAllOrgDetails(client, path, sessionId, lang, orgs):
         print i
 
 # get all videolecturs
-def getAllVideoLectures(client):
+def getAllVideoLectures(client, path):
     shutil.copyfile(path+'tinydb/videolectures.json', path+'tinydb/videolectures.json.backup')
     result = urllib2.urlopen(client)
     lectures = json.loads(result.read())
@@ -382,6 +386,35 @@ def getAllVideoLectures(client):
         tblLec.insert(lectures[l])
         if i%10000 == 0:
             print i
+
+# get event registry events with concept Education
+def getAllEREducationEvents(path):
+    er = EventRegistry(host = "http://eventregistry.org", logging = True)
+    q = QueryEvents()
+    q.addConcept(er.getConceptUri("Education"))
+    q.addRequestedResult(RequestEventsUriList())
+    res = er.execQuery(q)
+    obj = createStructFromDict(res)
+    uris = obj.uriList
+
+    l = len(uris)
+    inserts = []
+    tblEvents.purge()
+    for i,uri in enumerate(uris):
+        try:
+            q = QueryEvent(uri)
+            q.addRequestedResult(RequestEventInfo(["eng"]))   # get event information. concept labels should be in three langauges
+            q.addRequestedResult(RequestEventArticles(0, 10))   # get 10 articles describing the event
+            q.addRequestedResult(RequestEventKeywordAggr())     # get top keywords describing the event
+            eventRes = er.execQuery(q)
+            out = {}
+            out['info'] =  eventRes[uri][u'info'][u'multiLingInfo']
+            out['date'] =  eventRes[uri][u'info'][u'eventDate']
+            out['uri'] = uri
+            tblEvents.insert(out)
+            print i,l
+        except:
+            pass
 
 ####################
 # Indexing

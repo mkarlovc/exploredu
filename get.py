@@ -9,7 +9,7 @@ path = "/home/luis/data/mario/openedu/"
 # Start session
 t1 = time.time()
 print "Start session... " + str(t1)
-
+'''
 # Loading credentials
 print "Loading credentials"
 pwd = {}
@@ -63,3 +63,7 @@ print (t8 - t1)/(60*60)
 print len(get_data.tblRsr.all())
 print len(get_data.tblLec.all())
 print len(get_data.tblRsrPrj.all())
+'''
+get_data.getAllEREducationEvents(path)
+t8 = time.time()
+print (t8 - t1)/(60*60)
