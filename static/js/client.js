@@ -35,7 +35,7 @@ function drawRsrPrjColl(data) {
 
 
 $("#basic-addon2").click(function(){
-    $.get("http://95.87.154.208:8080/api/all/"+$("#text").val(), function(data, status){
+    $.get("http://95.87.154.208:8888/api/all/"+$("#text").val(), function(data, status){
         fillRsr(data.rsr);
         fillPrj(data.prj);
         fillLec(data.lec);

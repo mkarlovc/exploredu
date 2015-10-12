@@ -17,6 +17,8 @@ import re
 from itertools import islice
 from random import randint
 from EventRegistry.EventRegistry import *
+from lxml import html
+import requests
 
 # Set main data path
 path = "/home/luis/data/mario/openedu/"
@@ -415,6 +417,12 @@ def getAllEREducationEvents(path):
             print i,l
         except:
             pass
+
+def getAllSIO():
+    page = requests.get('http://portal.sio.si/gradiva')
+    tree = html.fromstring(str(page.text))
+    links = tree.xpath('//td[@class="style9"]/a/text()')
+    print links
 
 ####################
 # Indexing
