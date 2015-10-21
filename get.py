@@ -64,7 +64,8 @@ print len(get_data.tblRsr.all())
 print len(get_data.tblLec.all())
 print len(get_data.tblRsrPrj.all())
 get_data.getAllEREducationEvents(path)
-'''
 get_data.getAllSIO()
+'''
+index = get_data.createIndexRsrKeyws(path, get_data.tblRsr)
 t8 = time.time()
 print (t8 - t1)/(60*60)

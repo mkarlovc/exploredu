@@ -464,6 +464,40 @@ science=s, scienceCode=s_code, field=f, subfield=sub, content=content)
     writer.commit()
     return index
 
+def createIndexRsrKeyws(path, tblRsr):
+    schema = Schema(keyws=TEXT(stored=True), freq=NUMERIC(stored=True))
+    
+    if not os.path.exists(path+"whooshindex/rsrkeyws"):
+        os.makedirs(path+"whooshindex/rsrkeyws")
+
+    index = create_in(path+"whooshindex/rsrkeyws", schema)
+    
+    keywsdict = {}
+    writer = index.writer()
+
+    for rsr in tblRsr.all():
+        keyws = []
+        if rsr.has_key('keyws_en'):
+            content = rsr['keyws_en']['@keyws']
+            content = content.lower()
+            content = content.replace(';', ',')
+            keyws = content.split(',')
+        if len(keyws) > 0:
+            for keyw in keyws:
+                keyw = keyw.rstrip('.').strip()
+                if not keywsdict.has_key(keyw):
+                    keywsdict[keyw] = 1
+                else:
+                    keywsdict[keyw] += 1
+    
+    # put all unique keywords into index
+    for i,k in enumerate(keywsdict):
+        print i,k,keywsdict[k]
+        writer.add_document(keyws=k, freq=keywsdict[k])
+    
+    writer.commit()
+    return index
+
 # create index of searchabe projects using whoosh. Index is called prj
 def createIndexPrj(path, tblPrj):
     schema = Schema(name=TEXT(stored=True), startdate=TEXT(stored=True), enddate=TEXT(stored=True), mstid=TEXT(stored=True), content=TEXT)
