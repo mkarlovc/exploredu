@@ -41,7 +41,7 @@ tblLec = dbVideoLectures.table("lec")
 # --- conn
 tblRsrPrj = dbSicrisConn.table("rsr_prj")
 # --- nets
-tblRsrColl = dbNets.table("rsr_colls")
+earblRsrColl = dbNets.table("rsr_colls")
 tblRsrPrjColl = dbNets.table("rsr_prj_coll_net")
 tblRsrPrjCollW = dbNets.table("rsr_prj_coll_net_w")
 # --- cache
@@ -431,7 +431,7 @@ def getAllSIO():
 # create index of searchable researchers using whoosh index
 def createIndexRsr(path, tblRsr):
     schema = Schema(fname=TEXT(stored=True), lname=TEXT(stored=True), id=TEXT(stored=True), mstid=TEXT(stored=True),\
-science=TEXT(stored=True), scienceCode=TEXT(stored=True), field=TEXT(stored=True), subfield=TEXT(stored=True), content=TEXT)
+science=TEXT(stored=True), scienceCode=TEXT(stored=True), field=TEXT(stored=True), subfield=TEXT(stored=True), keyws_en=TEXT(stored=True), keyws_sl=TEXT(stored=True), content=TEXT)
     index = create_in(path+"whooshindex/rsr", schema)
 
     writer = index.writer()
@@ -441,6 +441,8 @@ science=TEXT(stored=True), scienceCode=TEXT(stored=True), field=TEXT(stored=True
         s_code = u""
         f = u""
         sub = u""
+        keyws_en = u""
+        keyws_sl = u""
         if rsr.has_key('science'):
             s = rsr['science']['#text']
             s_code = rsr['science']['@code']
@@ -452,14 +454,16 @@ science=TEXT(stored=True), scienceCode=TEXT(stored=True), field=TEXT(stored=True
             sub = rsr['subfield']['#text']
             content += " "+rsr['subfield']['#text']
         if rsr.has_key('keyws_en'):
+            keyws_en = rsr['keyws_en']['@keyws']
             content += " "+rsr['keyws_en']['@keyws']
         if rsr.has_key('keyws_sl'):
+            keyws_sl = rsr['keyws_sl']['@keyws']
             content += " "+rsr['keyws_sl']['@keyws']
 
         if content != "":
             print rsr["@id"]+": "+content
             writer.add_document(lname=rsr['fname'], fname=rsr['lname'], id=rsr['@id'], mstid=rsr['@mstid'],\
-science=s, scienceCode=s_code, field=f, subfield=sub, content=content) 
+science=s, scienceCode=s_code, field=f, subfield=sub, keyws_en=keyws_en, keyws_sl=keyws_sl, content=content) 
     
     writer.commit()
     return index
@@ -691,6 +695,9 @@ def createRsrPrjCollNetWeighted():
 def loadIndexRsr(path):
     return windex.open_dir(path+"whooshindex/rsr")
 
+def loadIndexRsrKeyws(path):
+    return windex.open_dir(path+"whooshindex/rsrkeyws")
+
 def loadIndexPrj(path):
     return windex.open_dir(path+"whooshindex/prj")
 
@@ -713,6 +720,16 @@ def searchIndex(index, text):
     out = []
     with index.searcher() as searcher:
         parser = QueryParser("content", index.schema)
+        myquery = parser.parse(text)
+        results = searcher.search(myquery, limit=None)
+        for res in results:
+            out.append(dict(res))
+    return out
+
+def searchIndexRsrKeyws(index, text):
+    out = []
+    with index.searcher() as searcher:
+        parser = QueryParser("keyws", index.schema)
         myquery = parser.parse(text)
         results = searcher.search(myquery, limit=None)
         for res in results:
@@ -795,3 +812,111 @@ def getPrjHistogram(prjs):
             hist[str(y)] = 0
 
     return hist
+
+# get related keywords based - on keywords of related researchers
+def getRelatedKeywsRelRsr(rsrs):
+    hist = {}
+    for i,rsr in enumerate(rsrs):
+        print rsr
+        if rsr.has_key('keyws_en'):
+            keyws = re.split('; |, |;|,|\*|\n', rsr['keyws_en'])
+            for keyw in keyws:
+                keyw = keyw.lower().rstrip('.')
+                if not hist.has_key(keyw):
+                    hist[keyw] = 1
+                else:
+                    hist[keyw] += 1
+
+    sorted_hist = OrderedDict(sorted(hist.items(), reverse=True, key=lambda x: x[1]))
+    out = []
+    order = 1
+    for k, v in sorted_hist.items():
+        out.append({'keyws':k, 'rank':order, 'freq':v})
+        order += 1
+
+    return out
+
+def getRelatedClassificationRelRsr(rsrs):
+    sci_hist = {}
+    field_hist = {}
+    subfield_hist = {}
+
+    for i,rsr in enumerate(rsrs):
+        if rsr.has_key('science'):
+            science = rsr['science']
+            if science != "":
+                if not sci_hist.has_key(science):
+                    sci_hist[science] = 1
+                else:
+                    sci_hist[science] += 1
+        
+        if rsr.has_key('field'):
+            if rsr.has_key('science'):
+                science = rsr['science']
+            field = rsr['field']
+
+            if field != "":
+                if not field_hist.has_key(field):
+                    field_hist[science+"_"+field] = 1
+                else:
+                    field_hist[science+"_"+field] += 1
+
+        if rsr.has_key('subfield'):
+            if rsr.has_key('science'):
+                science = rsr['science']
+            if rsr.has_key('field'):
+                field = rsr['field']
+
+            subfield = rsr['subfield']
+            if subfield != "":
+                if not subfield_hist.has_key(subfield):
+                    subfield_hist[science+"_"+field+"_"+subfield] = 1
+                else:
+                    subfield_hist[science+"_"+field+"_"+subfield] += 1
+
+    sci_sorted_hist = OrderedDict(sorted(sci_hist.items(), reverse=True, key=lambda x: x[1]))
+    field_sorted_hist = OrderedDict(sorted(field_hist.items(), reverse=True, key=lambda x: x[1]))
+    subfield_sorted_hist = OrderedDict(sorted(subfield_hist.items(), reverse=True, key=lambda x: x[1]))
+
+    out = {}
+    sci_arr = []
+    field_arr = []
+    subfield_arr = []
+
+    order = 1
+    sum_sci = 0.0
+    for k, v in sci_sorted_hist.items():
+        sci_arr.append({'science':k, 'rank':order, 'freq':round(v,3)})
+        sum_sci += v
+        order += 1
+    
+    for sub in sci_arr:
+        sub['rel'] = float(sub['freq'])/sum_sci
+
+    order = 1
+    sum_field = 0.0
+    for k, v in field_sorted_hist.items():
+        k = k.split('_')
+        field_arr.append({'science':k[0], 'field':k[1], 'rank':order, 'freq':round(v,3)})
+        sum_field += v
+        order += 1
+
+    for sub in field_arr:
+        sub['rel'] = float(sub['freq'])/sum_field   
+
+    order = 1
+    sum_subfield = 0.0
+    for k, v in subfield_sorted_hist.items():
+        k = k.split('_')
+        subfield_arr.append({'science':k[0], 'field': k[1],'subfield':k[2], 'rank':order, 'freq':round(v,3)})
+        sum_subfield += v
+        order += 1
+
+    for sub in subfield_arr:
+        sub['rel'] = float(sub['freq'])/sum_subfield
+
+    out['sciences'] = sci_arr
+    out['fields'] = field_arr
+    out['subfields'] = subfield_arr
+    
+    return out
