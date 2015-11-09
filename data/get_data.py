@@ -821,11 +821,12 @@ def getRelatedKeywsRelRsr(rsrs):
         if rsr.has_key('keyws_en'):
             keyws = re.split('; |, |;|,|\*|\n', rsr['keyws_en'])
             for keyw in keyws:
-                keyw = keyw.lower().rstrip('.')
-                if not hist.has_key(keyw):
-                    hist[keyw] = 1
-                else:
-                    hist[keyw] += 1
+                if keyw != "":
+                    keyw = keyw.lower().rstrip('.')
+                    if not hist.has_key(keyw):
+                        hist[keyw] = 1
+                    else:
+                        hist[keyw] += 1
 
     sorted_hist = OrderedDict(sorted(hist.items(), reverse=True, key=lambda x: x[1]))
     out = []
