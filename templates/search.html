@@ -7,20 +7,20 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Open Education Portal</title>
+  <title>ExplorEdu</title>
 
   <!-- Bootstrap Core CSS -->
-  <link rel="stylesheet" href="static/css/bootstrap.min.css" type="text/css">
+  <link rel="stylesheet" href="../static/css/bootstrap.min.css" type="text/css">
   <!-- Custom Fonts -->
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-  <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link href='http://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" href="static/font-awesome/css/font-awesome.min.css" type="text/css">
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' type='text/css'>
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic' type='text/css'>
+  <link rel="stylesheet" href="../static/font-awesome/css/font-awesome.min.css" type="text/css">
   <!-- Plugin CSS -->
-  <link rel="stylesheet" href="static/css/animate.min.css" type="text/css">
+  <link rel="stylesheet" href="../static/css/animate.min.css" type="text/css">
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="static/css/creative.css" type="text/css">
-  <link rel="stylesheet" href="static/css/oep.css" type="text/css">
+  <link rel="stylesheet" href="../static/css/creative.css" type="text/css">
+  <link rel="stylesheet" href="../static/css/oep.css" type="text/css">
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <!--[if lt IE 9]>
@@ -40,7 +40,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand page-scroll" href="#page-top">ExplorEdu Portal</a>
+                <a class="navbar-brand page-scroll" href="#page-top">ExplorEdu</a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
@@ -62,14 +62,51 @@
 				<h1>ExplorEdu Portal</h1><hr>
         <!-- <p>Find stuff here</p> -->
         <div class="input-group">
-          <input type="text" id="text" class="form-control" placeholder="Search Query" aria-describedby="search">
+          <input type="text" id="searchQuery" class="form-control typeahead" placeholder="Search Query" aria-describedby="search">
           <span class="input-group-addon" id="basic-addon2">Search</span><!-- http://95.87.154.216/api/rsr/machine%20learning -->
 		</div>
       </div>
     </div>
   </header>
-
+  
   <section class="bg-primary" id="scienceAtlas">
+    <div class="container text-center">
+	  <h2>Overview of your search</h2>
+      <div class="row">
+        <div class="col-md-4 text-left">
+			<h3>1,000,000 results</h3>
+			<div class="text-faded">
+				<div class="curly-braced-block">
+					<div class="icon"><img src="../static/img/sciencelab.svg" width="40px" height="auto" /></div>
+					<div class="brace-left"><div class="brace-top"></div><div class="brace-bottom"></div></div>
+					<div class="content">
+						<table>
+							<tr><td class="text-right">504</td><td>researchers</td></tr>
+							<tr><td class="text-right">17</td><td>projects</td></tr>
+							<tr><td class="text-right">9</td><td>organizations</td></tr>
+						</table>
+					</div>
+				</div>
+				<div class="curly-braced-block">
+					<div class="icon"><img src="../static/img/videolectures.svg" width="25px" height="auto" /></div>
+					<div class="content">
+						<table>
+							<tr><td class="text-right">504</td><td>videos</td></tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4 text-center">
+		</div>
+		<div class="col-md-4 text-center">
+			<div id="wordCloud"></div>
+		</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="scienceAtlas">
     <div class="container">
       <div class="row">
 		<h2 class="section-heading">Science Atlas</h2>
@@ -119,28 +156,51 @@
           <hr class="primary">
           <p>Ready to start your next project with us? That's great! Give us a call or send us an email and we will get back to you as soon as possible!</p>
         </div>
-        <div class="col-lg-4 col-lg-offset-2 text-center"><img src="static/img/sio-logo.png" /></div>
-        <div class="col-lg-4 text-center"><img src="static/img/videolectures-net-logo.png" /></div>
+        <div class="col-lg-4 col-lg-offset-2 text-center"><img src="../static/img/sio-logo.png" /></div>
+        <div class="col-lg-4 text-center"><img src="../static/img/videolectures-net-logo.png" /></div>
       </div>
     </div>
   </section>
 
     <!-- jQuery -->
-  <script src="static/js/jquery.js"></script>
-  <script src="static/js/bootstrap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+  <script type="text/javascript" src="../static/js/jquery.js"></script>
+  <script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+  <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
   <!-- Plugin JavaScript -->
-  <script src="static/js/jquery.easing.min.js"></script>
-  <script src="static/js/jquery.fittext.js"></script>
-  <script src="static/js/wow.min.js"></script>
-  <script type=text/javascript src="static/js/sigma/sigma.min.js"></script>
-  <script type=text/javascript src="static/js/sigma/sigma.forceatlas2.js"></script>
+  <script type="text/javascript" src="../static/js/jquery.easing.min.js"></script>
+  <script type="text/javascript" src="../static/js/jquery.fittext.js"></script>
+  <script type="text/javascript" src="../static/js/wow.min.js"></script>
+  <script type="text/javascript" src="../static/js/typeahead.bundle.min.js"></script>
+  <script type="text/javascript" src="../static/js/d3.layout.cloud.js"></script>
+  <script type="text/javascript" src="../static/js/sigma/sigma.min.js"></script>
+  <script type="text/javascript" src="../static/js/sigma/sigma.forceatlas2.js"></script>
   <!-- Custom JavaScript -->
-  <script src="static/js/creative.js"></script>
-  <script src="static/js/graph.js"></script>
-  <script src="static/js/client.js"></script>
+  <script type="text/javascript" src="../static/js/creative.js"></script>
+  <script type="text/javascript" src="../static/js/graph.js"></script>
+  <script type="text/javascript" src="../static/js/client.js"></script>
   <script>
-
+	var fetchSuggestions = new Bloodhound({
+	  datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+	  queryTokenizer: Bloodhound.tokenizers.whitespace,
+	  prefetch: 'http://95.87.154.208:8888/api/rsrkeyws/machine learning',
+	  remote: { url: 'http://95.87.154.208:8888/api/rsrkeyws/%QUERY', wildcard: '%QUERY' }
+	});
+	$('#remote .typeahead').typeahead(null, {name: 'best-pictures', display: 'value', source: fetchSuggestions});
+	
+	// Wordcloud
+	var c = {width: $("#wordCloud").width(), height: 200, translate: "translate(" + [$("#wordCloud").width()/2, 100] + ")"};
+	var wordSize = function(d) { return (2*Math.log(d.f)+10); }
+	var wordSizePX = function(d) { return (2*Math.log(d.f)+10) + "px"; }
+	var getWord = function(d) { return d.t; }
+	var list = [{"t":"motion","f":100},{"t":"forces","f":95},{"t":"electricity","f":90},{"t":"movement","f":85},{"t":"relation","f":80},{"t":"laws","f":75},{"t":"speed","f":70},{"t":"velocity","f":65},{"t":"define","f":60},{"t":"constraints","f":55},{"t":"universe","f":50},{"t":"physics","f":45},{"t":"describing","f":40},{"t":"matter","f":35},{"t":"physics-the","f":30},{"t":"world","f":25},{"t":"works","f":20},{"t":"science","f":15},{"t":"interactions","f":10},{"t":"studies","f":5},{"t":"properties","f":0}];
+    var color = d3.scale.linear().domain([0, 40, 70, 80, 90, 100]).range(["#fff", "#987", "#756", "#654", "#423", "#422"]);
+    d3.layout.cloud().size([c.width, c.height]).words(list).padding(2).text(getWord).spiral("archimedean").fontSize(wordSize).on("end", draw).start();
+    function draw(words) {
+        d3.select("#wordCloud").append("svg").attr("width", c.width).attr("height", c.height).attr("class", "wordcloud").append("g").attr("transform", c.translate).selectAll("text").data(words).enter()
+			.append("text").style("font-size", wordSizePX).style("fill", function(d, i) { return color(i); }).attr("text-anchor", "middle")
+			.attr("transform", function(d) { return "translate(" + [d.x, d.y] + ") rotate(" + d.rotate + ")"; }).text(getWord);
+    }
   </script>
 </body>
 </html>
