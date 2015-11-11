@@ -30,6 +30,7 @@ dbNets = TinyDB(path+'tinydb/nets.json')
 dbSicrisConn = TinyDB(path+'tinydb/conn.json')
 dbCach = TinyDB(path+'tinydb/cach.json')
 dbER = TinyDB(path+'tinydb/er.json')
+dbSio = TinyDB(path+'tinydb/sio.json')
 
 # Tables
 # --- sicris
@@ -48,6 +49,8 @@ tblRsrPrjCollW = dbNets.table("rsr_prj_coll_net_w")
 tblRsrPrjGraphCache = dbCach.table("rsr_prj_graph")
 # --- events
 tblEvents = dbER.table("events")
+# --- sio educational materials
+tblEduMaterials = dbSio.table("materials")
 
 # from sorted dict to dict
 def to_dict(input_ordered_dict):
@@ -72,6 +75,10 @@ def createClientVideoLectures(username, password):
 
 def getSessionId(client, username, password):
     return client.service.GetSessionID("si", username, password)
+
+###################
+# Data collection
+###################
    
 def getAllRsr(client, path, sessionId):
     shutil.copyfile(path+'tinydb/sicris.json', path+'tinydb/sicris.json.backup')
@@ -82,10 +89,6 @@ def getAllRsr(client, path, sessionId):
     obj = xmltodict.parse(res)
     for rsr in obj['CRIS_RECORDS']['RSR']:
         tblRsr.insert(to_dict(rsr))
-
-###################
-# Data collection
-###################
 
 def getAllRsrKeyws(client, path, sessionId, lang, rsrs):
     shutil.copyfile(path+'tinydb/sicris.json', path+'tinydb/sicris.json.backup')
@@ -422,9 +425,24 @@ def getAllSIO():
     page = requests.get('http://portal.sio.si/gradiva')
     tree = html.fromstring(str(page.text))
     links = tree.xpath('//td[@class="style9"]/a/text()')
-    print links
+    #print len(links)
 
-####################
+def getAllSioFile():
+    tblEduMaterials.purge()
+    f = open('/home/luis/data/mario/sio/sio1', 'r')
+    for line in f:
+        mat = {}
+        arr =  line.rstrip('\n').split('\t')
+        if len(arr) > 4:
+            mat["name"] = arr[0]
+            mat["link"] = arr[1]
+            mat["level"] = arr[2]
+            mat["grade"] = arr[3]
+            mat["subject"] = arr[4]
+            print mat
+            tblEduMaterials.insert(mat)
+
+
 # Indexing
 ####################
 
@@ -734,6 +752,17 @@ def searchIndexRsrKeyws(index, text):
         results = searcher.search(myquery, limit=None)
         for res in results:
             out.append(dict(res))
+    return out
+
+def searchIndexRsrKeywsAutocomplete(index, text):
+    out = []
+    with index.searcher() as searcher:
+        parser = QueryParser("keyws", index.schema)
+        myquery = parser.parse(text+"*")
+        results = searcher.search(myquery, limit=None)
+        for res in results:
+            obj = dict(res)
+            out.append(obj["keyws"])
     return out
 
 # Get value from arbitrary cache table for arbitrary query

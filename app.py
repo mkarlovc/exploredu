@@ -64,6 +64,12 @@ def search_rsrkeyws(text):
     res = get_data.searchIndexRsrKeyws(index, text)
     return json.dumps(res)
 
+@app.route('/api/autocomplete/<text>', methods=['GET'])
+def search_autocomplete(text):
+    index = get_data.loadIndexRsrKeyws(path)
+    res = get_data.searchIndexRsrKeywsAutocomplete(index, text)
+    return json.dumps(res)
+
 @app.route('/api/rsrprjgraph/<text>', methods=['GET'])
 def rsr_prj_graph(text):
     cache = get_data.getCache(get_data.tblRsrPrjGraphCache, text)

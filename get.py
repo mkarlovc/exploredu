@@ -33,17 +33,14 @@ get_data.getAllRsr(client, path, sessionId)
 t3 = time.time()
 print "Get all resercher keywords... "+str((t3-t1)/3600)
 get_data.getAllRsrKeyws(client, path, sessionId, get_data.tblRsr,"eng")
-'''
 # Create index rsr
 t4 = time.time()
 print "Create index rsr... "+str((t4-t1)/3600)
 index = get_data.createIndexRsr(path, get_data.tblRsr)
-'''
 # Get al projects
 t5 = time.time()
 print "Get all projects... "+str((t5-t1)/3600)
 get_data.getAllPrj(client, path, sessionId, "eng")
-
 
 get_data.getAllPrjDetails(client, path, sessionId, "eng", get_data.tblPrj)
 t5 = time.time()
@@ -71,3 +68,4 @@ index = get_data.createIndexRsrKeyws(path, get_data.tblRsr)
 t8 = time.time()
 print (t8 - t1)/(60*60)
 '''
+get_data.getAllSioFile()
