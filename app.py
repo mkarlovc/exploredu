@@ -58,6 +58,12 @@ def search_rsr(text):
     res = get_data.searchIndex(index, text)
     return json.dumps(res)
 
+@app.route('/api/rsrkeyws/<text>', methods=['GET'])
+def search_rsrkeyws(text):
+    index = get_data.loadIndexRsrKeyws(path)
+    res = get_data.searchIndexRsrKeyws(index, text)
+    return json.dumps(res)
+
 @app.route('/api/rsrprjgraph/<text>', methods=['GET'])
 def rsr_prj_graph(text):
     cache = get_data.getCache(get_data.tblRsrPrjGraphCache, text)
@@ -89,10 +95,23 @@ def search_lec(text):
     res = get_data.searchIndex(index, text)
     return json.dumps(res)
 
+@app.route('/api/keyws/relrsr/<text>', methods=['GET'])
+def search_keyws_rel_rsr(text):
+    index = get_data.loadIndexRsr(path)
+    rsrs = get_data.searchIndex(index, text)
+    res = get_data.getRelatedKeywsRelRsr(rsrs)
+    return json.dumps(res)
+
+@app.route('/api/class/relrsr/<text>', methods=['GET'])
+def search_class_rel_rsr(text):
+    index = get_data.loadIndexRsr(path)
+    rsrs = get_data.searchIndex(index, text)
+    res = get_data.getRelatedClassificationRelRsr(rsrs)
+    return json.dumps(res)
+
 ####################
 # Internal
 ###################
-
 
 # Main
 if __name__ == '__main__':
