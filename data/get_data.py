@@ -19,6 +19,7 @@ from random import randint
 from EventRegistry.EventRegistry import *
 from lxml import html
 import requests
+#import wikipedia
 
 # Set main data path
 path = "/home/luis/data/mario/openedu/"
@@ -79,7 +80,8 @@ def getSessionId(client, username, password):
 ###################
 # Data collection
 ###################
-   
+
+# Get list of researchers from SICRIS   
 def getAllRsr(client, path, sessionId):
     shutil.copyfile(path+'tinydb/sicris.json', path+'tinydb/sicris.json.backup')
     methodCall = "Sicris_app_UI.Researcher.SearchSimple.eng.public.utf-8.mstid.%.1.-1"
@@ -90,6 +92,7 @@ def getAllRsr(client, path, sessionId):
     for rsr in obj['CRIS_RECORDS']['RSR']:
         tblRsr.insert(to_dict(rsr))
 
+# Get keywords of researchers
 def getAllRsrKeyws(client, path, sessionId, lang, rsrs):
     shutil.copyfile(path+'tinydb/sicris.json', path+'tinydb/sicris.json.backup')
     methodCall = "Sicris_app_UI.Researcher.GetKeywords."+lang+"."
@@ -114,6 +117,7 @@ def getAllRsrKeyws(client, path, sessionId, lang, rsrs):
                 # overwrite it
                 tblRsr.update(old, where('@id') == rsr["@id"])
 
+# Get classification for researchers
 def getAllRsrClass(client, sessionId, lang, rsrs):
     methodCall = "Sicris_app_UI.Researcher.GetMSTClassification."+lang+"."
     for rsr in rsrs.all():
@@ -137,6 +141,7 @@ def getAllRsrClass(client, sessionId, lang, rsrs):
                 # overwrite it
                 tblRsr.update(old, where('@id') == rsr["@id"])
 
+# Get projects of researchers
 def getAllRsrPrj(client, path, sessionId, lang, prjs):
     methodCall = "Sicris_app_UI.Project.GetResearchers."+lang+"."
     shutil.copyfile(path+'tinydb/sicris.json', path+'tinydb/sicris.json.backup')
@@ -165,6 +170,7 @@ def getAllRsrPrj(client, path, sessionId, lang, prjs):
                     tblRsrPrj.insert({'prjid': prjid, 'rsrmstid': rsr['@mstid'] })
         print i, totallen
 
+# Get projects of researchers
 def getAllPrjRsr(client, path, sessionId, lang, rsrs):
     methodCall = "Sicris_app_UI.Researcher.GetProjects.PRJ."+lang+"."
     shutil.copyfile(path+'tinydb/sicris.json', path+'tinydb/sicris.json.backup')
@@ -442,7 +448,14 @@ def getAllSioFile():
             print mat
             tblEduMaterials.insert(mat)
 
+# get wikipedia summeries for set of keywords
+'''
+def getWikipediaKeywords(keyws):
+    for keyw in keyws:
+        wikipedia.search(keyw)
+'''
 
+####################
 # Indexing
 ####################
 

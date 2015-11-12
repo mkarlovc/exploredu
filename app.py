@@ -2,24 +2,29 @@ from flask import Flask, render_template
 from data import get_data
 import json
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 path = "/home/luis/data/mario/openedu/"
 
-###########
+##############
 # Interface
-###########
+##############
 
 @app.route('/')
 def search():
-    return render_template('search.html')
+    #return render_template('search.html')
+    return app.send_static_file('index.html')
+
+@app.route('/search')
+def test():
+    return app.send_static_file('search.html')
 
 @app.route('/graph')
 def graph():
     return render_template('graph.html')
 
-###########
+#############
 # API
-###########
+#############
 
 @app.route('/api/all/<text>', methods=['GET'])
 def search_all(text):    
