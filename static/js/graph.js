@@ -1,16 +1,3 @@
-
-
-var c = new Array();
-c['-1'] = "#9B9B9B";
-c['N'] = "#0E53A7"
-c['M'] = "#A64300"
-c['B'] = "#FF6700"
-c['T'] = "#0ACF00"
-c['S'] = "#FBB917"
-c['H'] = "#FBB917"
-c['I'] = "#FF0000"
-
-
 function drawGraph(graph) {
     nodes = graph.nodes;
     edges = graph.edges;
@@ -45,6 +32,15 @@ function drawGraph(graph) {
 
 
 function drawGraph1(graph) {
+	var c = new Array();
+	c['-1'] = "#9B9B9B";
+	c['N'] = "#0E53A7"
+	c['M'] = "#A64300"
+	c['B'] = "#FF6700"
+	c['T'] = "#0ACF00"
+	c['S'] = "#FBB917"
+	c['H'] = "#FBB917"
+	c['I'] = "#FF0000"
     var nodes = graph.nodes;
     var edges = graph.edges;
 

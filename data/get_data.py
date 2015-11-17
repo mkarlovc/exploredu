@@ -427,6 +427,23 @@ def getAllEREducationEvents(path):
         except:
             pass
 
+def getERNews():
+    er = EventRegistry()
+    q = QueryArticles()     # we want to make a search for articles
+    q.addKeyword("education")       # article should contain word apple
+    q.addKeyword("teaching")      # article should also contain word iphone
+    q.addRequestedResult(RequestArticlesInfo(page=0, count = 30));  # get 30 articles that match the criteria
+    res = er.execQuery(q)
+    return res
+
+def getERNewsRelated(text):
+    er = EventRegistry()
+    q = QueryArticles()     # we want to make a search for articles
+    q.addKeyword(text)       # article should contain word apple
+    q.addRequestedResult(RequestArticlesInfo(page=0, count = 30));  # get 30 articles that match the criteria
+    res = er.execQuery(q)
+    return res
+
 def getAllSIO():
     page = requests.get('http://portal.sio.si/gradiva')
     tree = html.fromstring(str(page.text))
@@ -435,7 +452,7 @@ def getAllSIO():
 
 def getAllSioFile():
     tblEduMaterials.purge()
-    f = open('/home/luis/data/mario/sio/sio1', 'r')
+    f = open('/home/luis/data/mario/sio/sio3', 'r')
     for line in f:
         mat = {}
         arr =  line.rstrip('\n').split('\t')
@@ -445,8 +462,11 @@ def getAllSioFile():
             mat["level"] = arr[2]
             mat["grade"] = arr[3]
             mat["subject"] = arr[4]
+            mat["description"] = arr[5]
             print mat
             tblEduMaterials.insert(mat)
+
+
 
 # get wikipedia summeries for set of keywords
 '''
@@ -535,7 +555,7 @@ def createIndexRsrKeyws(path, tblRsr):
 
 # create index of searchabe projects using whoosh. Index is called prj
 def createIndexPrj(path, tblPrj):
-    schema = Schema(name=TEXT(stored=True), startdate=TEXT(stored=True), enddate=TEXT(stored=True), mstid=TEXT(stored=True), content=TEXT)
+    schema = Schema(name=TEXT(stored=True), id=TEXT(stored=True), startdate=TEXT(stored=True), enddate=TEXT(stored=True), mstid=TEXT(stored=True), content=TEXT)
     index = create_in(path+"whooshindex/prj", schema)
     
     writer = index.writer()
@@ -554,7 +574,7 @@ def createIndexPrj(path, tblPrj):
 
         if content != "" and prj.has_key('name'):
             print prj["@id"]+": "+content
-            writer.add_document(name=prj['name'], startdate=prj['@startdate'], enddate=prj['@enddate'], mstid=prj['@mstid'], content=content)
+            writer.add_document(name=prj['name'], id=prj["@id"], startdate=prj['@startdate'], enddate=prj['@enddate'], mstid=prj['@mstid'], content=content)
  
     writer.commit()
     return index
@@ -585,6 +605,32 @@ def createIndexOrg(path, tblOrg):
         if content != "" and org.has_key('name'):
             print org["@id"]+": "+content
             writer.add_document(name=name, city=city, science=science, content=content)
+
+    writer.commit()
+    return index
+
+# create index of searchable sio
+def createIndexSio(path, tblEduMaterials):
+    schema = Schema(name=TEXT(stored=True), link=TEXT(stored=True), level=TEXT(stored=True), grade=TEXT(stored=True), subject=TEXT(stored=True), content=TEXT)
+    index = create_in(path+"whooshindex/sio", schema)
+
+    writer = index.writer()
+    for sio in tblEduMaterials.all():
+        name = u""
+        link = u""
+        level = u""
+        grade = u""
+        subject = u""
+        description = u""
+        
+        name = sio["name"]
+        link = sio["link"]
+        level = sio["level"]
+        grade = sio["grade"]
+        subject = sio["subject"]
+        description = sio["description"]
+        print name,description 
+        writer.add_document(name=name, link=link, level=level, grade=grade, subject=subject, content=description)
 
     writer.commit()
     return index
@@ -725,6 +771,9 @@ def createRsrPrjCollNetWeighted():
  
 def loadIndexRsr(path):
     return windex.open_dir(path+"whooshindex/rsr")
+
+def loadIndexSio(path):
+    return windex.open_dir(path+"whooshindex/sio")
 
 def loadIndexRsrKeyws(path):
     return windex.open_dir(path+"whooshindex/rsrkeyws")

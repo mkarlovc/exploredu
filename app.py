@@ -57,10 +57,42 @@ def search_all(text):
 
     return json.dumps({'rsr': rsr, 'prj':prj, 'lec':lec, 'graph':graph, 'hist': hist})
 
+@app.route('/api/graph/<text>', methods=['GET'])
+def get_graph(text):
+# researchers projects collaboration graph
+    graph = []
+    cache = get_data.getCache(get_data.tblRsrPrjGraphCache, text)
+    if len(cache) > 0:
+        graph = cache[0]['res']
+    else:
+        index = get_data.loadIndexRsr(path)
+        rsrs = get_data.searchIndex(index, text)
+        res = get_data.graphRsrPrj(path, rsrs)
+        get_data.tblRsrPrjGraphCache.insert({'query': text, 'res':res})
+        graph = res
+    return json.dumps({'graph':graph})
+
 @app.route('/api/rsr/<text>', methods=['GET'])
 def search_rsr(text):
     index = get_data.loadIndexRsr(path)
     res = get_data.searchIndex(index, text)
+    return json.dumps(res)
+
+@app.route('/api/sio/<text>', methods=['GET'])
+def search_sio(text):
+    index = get_data.loadIndexSio(path)
+    print index
+    res = get_data.searchIndex(index, text)
+    return json.dumps(res)
+
+@app.route('/api/er/news', methods=['GET'])
+def search_er_news():
+    res = get_data.getERNews()
+    return json.dumps(res)
+
+@app.route('/api/er/news/<text>', methods=['GET'])
+def search_er_news_related(text):
+    res = get_data.getERNewsRelated(text)
     return json.dumps(res)
 
 @app.route('/api/rsrkeyws/<text>', methods=['GET'])

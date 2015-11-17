@@ -32,13 +32,3 @@ function drawRsrPrjColl(data) {
     console.log('draw graph');
     drawGraph1(data);
 }
-
-
-$("#basic-addon2").click(function(){
-    $.get("http://95.87.154.208:8888/api/all/"+$("#text").val(), function(data, status){
-        fillRsr(data.rsr);
-        fillPrj(data.prj);
-        fillLec(data.lec);
-        drawRsrPrjColl(data.graph);
-    }, "json");
-});
