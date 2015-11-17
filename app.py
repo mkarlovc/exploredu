@@ -57,6 +57,13 @@ def search_all(text):
 
     return json.dumps({'rsr': rsr, 'prj':prj, 'lec':lec, 'graph':graph, 'hist': hist})
 
+@app.route('/api/prj/hist/<text>', methods=['GET'])
+def get_prj_hist(text):
+    indexprj = get_data.loadIndexPrj(path)
+    prj = get_data.searchIndex(indexprj, text)
+    hist = get_data.getPrjHistogram(prj)
+    return json.dumps(hist)
+
 @app.route('/api/graph/<text>', methods=['GET'])
 def get_graph(text):
 # researchers projects collaboration graph

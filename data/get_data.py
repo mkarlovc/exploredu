@@ -19,6 +19,7 @@ from random import randint
 from EventRegistry.EventRegistry import *
 from lxml import html
 import requests
+import 	rdflib
 #import wikipedia
 
 # Set main data path
@@ -52,6 +53,7 @@ tblRsrPrjGraphCache = dbCach.table("rsr_prj_graph")
 tblEvents = dbER.table("events")
 # --- sio educational materials
 tblEduMaterials = dbSio.table("materials")
+tblOds = dbSio.table("ods")
 
 # from sorted dict to dict
 def to_dict(input_ordered_dict):
@@ -466,10 +468,56 @@ def getAllSioFile():
             print mat
             tblEduMaterials.insert(mat)
 
+def getAllOds():
+    tblOds.purge()
+    f = open('/home/luis/data/mario/ods/ods.ttl', 'r')
+    g = rdflib.Graph()
+    result = g.parse(f, format='n3')
+    print len(g)
 
+    objs = {}
 
+    for subj, pred, obj in g:
+        if (subj, pred, obj) not in g:
+            raise Exception("It better be!")
+        else:
+            if subj.find("general") <> -1:
+                arr = subj.encode("utf-8").split("_")
+                if len(arr) > 1:
+                    objs[arr[len(arr)-2]] = {}
+    print len(objs)
+
+    for subj, pred, obj in g:
+        if (subj, pred, obj) not in g:
+            raise Exception("It better be!")
+        else:
+            if subj.find("general") <> -1:
+                arr = subj.encode("utf-8").split("_")
+                if len(arr) > 1:
+                    id = arr[len(arr)-2]
+                    if objs.has_key(id):
+                        objs[id][pred.encode("utf-8")] = obj.encode("utf-8")
+                        #if pred.encode("utf-8") == u"http://purl.org/dc/terms/identifier":
+                        #    objs[id]["identifier"] = obj.encode("utf-8")
+                        #if pred.encode("utf-8") == u"http://purl.org/dc/terms/title":
+                        #    objs[id]["title"] = obj.encode("utf-8")
+                        #if pred.encode("utf-8") == u"http://purl.org/dc/terms/description":
+                        #    objs[id]["desc"] = obj.encode("utf-8")
+    for o in objs:
+        print o, objs[o]
+   
+    print len(obj)
+
+    '''
+    # For each foaf:Person in the store print out its mbox property.
+    print("--- printing mboxes ---")
+    print len(g.subjects())
+    for person in g.subjects():
+        print person
+    '''
+
+'''    
 # get wikipedia summeries for set of keywords
-'''
 def getWikipediaKeywords(keyws):
     for keyw in keyws:
         wikipedia.search(keyw)
@@ -673,7 +721,7 @@ def createIndexLec(path, tblLec):
     writer.commit()
     return index
 
-# Create index for quick searching of ceonnection between researchers and projects
+# Create index for quick searching of connection between researchers and projects
 def createIndexRsrPrj(path, tblRsrPrj):
     schema = Schema(prjmstid=TEXT(stored=True), prjid=TEXT(stored=True), rsrid=TEXT(stored=True), content=TEXT)
     index = create_in(path+"whooshindex/rsrprj", schema)
@@ -686,7 +734,7 @@ def createIndexRsrPrj(path, tblRsrPrj):
     writer.commit()
     return index
 
-# Create index for quick searching of ceonnection between researchers and projects
+# Create index for quick searching of connection between researchers and projects
 def createIndexPrjRsr(tblRsrPrj):
     schema = Schema(prjmstid=TEXT(stored=True), prjid=TEXT(stored=True), rsrid=TEXT(stored=True), content=TEXT)
     index = create_in(path+"whooshindex/prjrsr", schema)

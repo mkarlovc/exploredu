@@ -46,7 +46,7 @@ function drawGraph1(graph) {
 
     var minNodeSizeVar = 2;
     if (nodes.length < 10 || nodes.length < 20)
-        minNodeSizeVar = 8;
+        minNodeSizeVar = 4;
 
     $('#graph').empty();
     var sigRoot = document.getElementById('graph');

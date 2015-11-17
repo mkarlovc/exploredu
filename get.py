@@ -41,9 +41,7 @@ index = get_data.createIndexRsr(path, get_data.tblRsr)
 t5 = time.time()
 print "Get all projects... "+str((t5-t1)/3600)
 get_data.getAllPrj(client, path, sessionId, "eng")
-'''
 index = get_data.createIndexPrj(path, get_data.tblPrj)
-'''
 get_data.getAllPrjDetails(client, path, sessionId, "eng", get_data.tblPrj)
 t5 = time.time()
 print (t5 - t1)/(60*60)
@@ -73,3 +71,5 @@ get_data.getAllSioFile()
 get_data.createIndexSio(path, get_data.tblEduMaterials)
 print 'done'
 '''
+print "GET data ODS"
+get_data.getAllOds()
