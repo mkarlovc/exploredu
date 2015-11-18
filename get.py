@@ -70,6 +70,7 @@ print (t8 - t1)/(60*60)
 get_data.getAllSioFile()
 get_data.createIndexSio(path, get_data.tblEduMaterials)
 print 'done'
-'''
 print "GET data ODS"
 get_data.getAllOds()
+get_data.getAllZakoni()
+'''

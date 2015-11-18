@@ -9,6 +9,7 @@ import whoosh.index as windex
 from whoosh.index import create_in
 from whoosh.fields import *
 from whoosh.qparser import QueryParser
+from whoosh.qparser import MultifieldParser
 from whoosh.query import *
 import urllib2
 import base64
@@ -33,6 +34,7 @@ dbSicrisConn = TinyDB(path+'tinydb/conn.json')
 dbCach = TinyDB(path+'tinydb/cach.json')
 dbER = TinyDB(path+'tinydb/er.json')
 dbSio = TinyDB(path+'tinydb/sio.json')
+dbZakoni = TinyDB(path+'tinydb/zakoni.json')
 
 # Tables
 # --- sicris
@@ -54,6 +56,8 @@ tblEvents = dbER.table("events")
 # --- sio educational materials
 tblEduMaterials = dbSio.table("materials")
 tblOds = dbSio.table("ods")
+# --- zakoni
+tblZakoni = dbZakoni.table("zakoni")
 
 # from sorted dict to dict
 def to_dict(input_ordered_dict):
@@ -93,6 +97,17 @@ def getAllRsr(client, path, sessionId):
     obj = xmltodict.parse(res)
     for rsr in obj['CRIS_RECORDS']['RSR']:
         tblRsr.insert(to_dict(rsr))
+
+def searchAllZakoni():
+    res = tblZakoni.all()
+    return res[::-1]
+
+def searchNumZakoni(num):
+    res = tblZakoni.all()
+    res = res[::-1]
+    if int(num) <= len(res):
+        res = res[0:int(num)]
+    return res
 
 # Get keywords of researchers
 def getAllRsrKeyws(client, path, sessionId, lang, rsrs):
@@ -468,6 +483,16 @@ def getAllSioFile():
             print mat
             tblEduMaterials.insert(mat)
 
+def getAllZakoni():
+    tblZakoni.purge()
+    f = "/home/luis/data/mario/zakoni/meta.1.json"
+    with open(f) as data_file: 
+        data = json.load(data_file)
+        for i,d in enumerate(data["zakoni"]):
+            print i,d
+            tblZakoni.insert(d)
+   
+
 def getAllOds():
     tblOds.purge()
     f = open('/home/luis/data/mario/ods/ods.ttl', 'r')
@@ -627,6 +652,10 @@ def createIndexPrj(path, tblPrj):
     writer.commit()
     return index
 
+def createIndexZakoni(path, tblZakoni):
+    schema = Schema(name=TEXT(stored=True), id=TEXT(stored=True), startdate=TEXT(stored=True), enddate=TEXT(stored=True), mstid=TEXT(stored=True), content=TEXT)
+    index = create_in(path+"whooshindex/prj", schema)
+    
 # create index of searchable organizations using whoosh stored as org
 def createIndexOrg(path, tblOrg):
     schema = Schema(name=TEXT(stored=True), city=TEXT(stored=True), science=TEXT(stored=True), mstid=TEXT(stored=True), content=TEXT)
@@ -854,6 +883,47 @@ def searchIndex(index, text):
             out.append(dict(res))
     return out
 
+def searchIndexSioAdv(index, text):
+    out = []
+    arg = json.loads(text)
+    name = ""
+    grade = ""
+    level = ""
+    text = ""
+    if arg.has_key("name"):
+        name = arg["name"]
+    if arg.has_key("grade"):
+        grade = arg["grade"]
+    if arg.has_key("level"):
+        level = arg["level"]
+    if arg.has_key("text"):
+        text = arg["text"]
+
+    with index.searcher() as searcher:
+        if arg.has_key("text"):
+            parser = QueryParser("content", index.schema)
+            myquery = parser.parse(text)
+            results = searcher.search(myquery, limit=None)
+        else:
+            results = tblEduMaterials.all()
+
+        for res in results:
+            add = True
+            res = dict(res)
+            if arg.has_key("name"):
+                if res["name"] != name:
+                    add = False
+            if arg.has_key("grade"):
+                if res["grade"] != grade:
+                    add = False
+            if arg.has_key("level"):
+                if res["level"] != level:
+                    add = False
+            if add == True:
+                out.append(res)
+                
+    return out	
+
 def searchIndexRsrKeyws(index, text):
     out = []
     with index.searcher() as searcher:
@@ -996,7 +1066,7 @@ def getRelatedClassificationRelRsr(rsrs):
             field = rsr['field']
 
             if field != "":
-                if not field_hist.has_key(field):
+                if not field_hist.has_key(science+"_"+field):
                     field_hist[science+"_"+field] = 1
                 else:
                     field_hist[science+"_"+field] += 1
@@ -1009,7 +1079,7 @@ def getRelatedClassificationRelRsr(rsrs):
 
             subfield = rsr['subfield']
             if subfield != "":
-                if not subfield_hist.has_key(subfield):
+                if not subfield_hist.has_key(science+"_"+field+"_"+subfield):
                     subfield_hist[science+"_"+field+"_"+subfield] = 1
                 else:
                     subfield_hist[science+"_"+field+"_"+subfield] += 1
@@ -1026,7 +1096,7 @@ def getRelatedClassificationRelRsr(rsrs):
     order = 1
     sum_sci = 0.0
     for k, v in sci_sorted_hist.items():
-        sci_arr.append({'science':k, 'rank':order, 'freq':round(v,3)})
+        sci_arr.append({'science':k, 'rank':order, 'freq':v})
         sum_sci += v
         order += 1
     
@@ -1037,7 +1107,7 @@ def getRelatedClassificationRelRsr(rsrs):
     sum_field = 0.0
     for k, v in field_sorted_hist.items():
         k = k.split('_')
-        field_arr.append({'science':k[0], 'field':k[1], 'rank':order, 'freq':round(v,3)})
+        field_arr.append({'science':k[0], 'field':k[1], 'rank':order, 'freq':v})
         sum_field += v
         order += 1
 
@@ -1048,7 +1118,7 @@ def getRelatedClassificationRelRsr(rsrs):
     sum_subfield = 0.0
     for k, v in subfield_sorted_hist.items():
         k = k.split('_')
-        subfield_arr.append({'science':k[0], 'field': k[1],'subfield':k[2], 'rank':order, 'freq':round(v,3)})
+        subfield_arr.append({'science':k[0], 'field': k[1],'subfield':k[2], 'rank':order, 'freq':v})
         sum_subfield += v
         order += 1
 

@@ -57,6 +57,16 @@ def search_all(text):
 
     return json.dumps({'rsr': rsr, 'prj':prj, 'lec':lec, 'graph':graph, 'hist': hist})
 
+@app.route('/api/zakoni/all', methods=['GET'])
+def get_zakoni_all():
+    res = get_data.searchAllZakoni()
+    return json.dumps(res)
+
+@app.route('/api/zakoni/<num>', methods=['GET'])
+def get_zakoni_num(num):
+    res = get_data.searchNumZakoni(num)
+    return json.dumps(res)
+
 @app.route('/api/prj/hist/<text>', methods=['GET'])
 def get_prj_hist(text):
     indexprj = get_data.loadIndexPrj(path)
@@ -90,6 +100,12 @@ def search_sio(text):
     index = get_data.loadIndexSio(path)
     print index
     res = get_data.searchIndex(index, text)
+    return json.dumps(res)
+
+@app.route('/api/sio/adv/<text>', methods=['GET'])
+def search_sio_adv(text):
+    index = get_data.loadIndexSio(path)
+    res = get_data.searchIndexSioAdv(index, text)
     return json.dumps(res)
 
 @app.route('/api/er/news', methods=['GET'])
