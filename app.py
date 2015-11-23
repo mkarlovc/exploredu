@@ -62,6 +62,12 @@ def get_zakoni_all():
     res = get_data.searchAllZakoni()
     return json.dumps(res)
 
+@app.route('/api/ods/<text>', methods=['GET'])
+def get_ods(text):
+    index = get_data.loadIndexOds(path)
+    ods = get_data.searchIndex(index, text)
+    return json.dumps(ods)
+
 @app.route('/api/zakoni/<num>', methods=['GET'])
 def get_zakoni_num(num):
     res = get_data.searchNumZakoni(num)
@@ -100,6 +106,11 @@ def search_sio(text):
     index = get_data.loadIndexSio(path)
     print index
     res = get_data.searchIndex(index, text)
+    return json.dumps(res)
+
+@app.route('/api/sio/categories', methods=['GET'])
+def search_sio_categories():
+    res = get_data.getUniqSio()
     return json.dumps(res)
 
 @app.route('/api/sio/adv/<text>', methods=['GET'])

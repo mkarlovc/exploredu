@@ -28,7 +28,7 @@ function fillLec(data) {
     }
 }
 
-function drawRsrPrjColl(data) {
-    console.log('draw graph');
-    drawGraph1(data);
+function drawRsrPrjColl(data, elementId) {
+    console.log('draw graph in ' + elementId);
+    drawGraph1(data, elementId);
 }

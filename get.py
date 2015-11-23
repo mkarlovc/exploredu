@@ -71,6 +71,9 @@ get_data.getAllSioFile()
 get_data.createIndexSio(path, get_data.tblEduMaterials)
 print 'done'
 print "GET data ODS"
-get_data.getAllOds()
+get_data.getAllOds(get_data.tblOds)
+'''
+index = get_data.createIndexOds(path, get_data.tblOds)
+'''
 get_data.getAllZakoni()
 '''

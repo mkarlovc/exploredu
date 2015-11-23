@@ -469,17 +469,22 @@ def getAllSIO():
 
 def getAllSioFile():
     tblEduMaterials.purge()
-    f = open('/home/luis/data/mario/sio/sio3', 'r')
+    f = open('/home/luis/data/mario/sio/sio4', 'r')
     for line in f:
         mat = {}
         arr =  line.rstrip('\n').split('\t')
-        if len(arr) > 4:
-            mat["name"] = arr[0]
-            mat["link"] = arr[1]
-            mat["level"] = arr[2]
-            mat["grade"] = arr[3]
-            mat["subject"] = arr[4]
-            mat["description"] = arr[5]
+        if len(arr) >= 9:
+            mat["link"] = arr[0]
+            mat["sio_link"] = arr[1]
+            mat["source"] = arr[2]
+            mat["sio_description"] = arr[3]
+            mat["sio_level_desc"] = arr[4]
+            mat["level"] = arr[5]
+            mat["grade"] = arr[6]
+            mat["subject_slo"] = arr[7]
+            mat["subject_eng"] = arr[8]
+            mat["description"] = arr[9]
+            #mat["edu_content"] = arr[10]
             print mat
             tblEduMaterials.insert(mat)
 
@@ -493,7 +498,7 @@ def getAllZakoni():
             tblZakoni.insert(d)
    
 
-def getAllOds():
+def getAllOds(tblOds):
     tblOds.purge()
     f = open('/home/luis/data/mario/ods/ods.ttl', 'r')
     g = rdflib.Graph()
@@ -521,17 +526,23 @@ def getAllOds():
                 if len(arr) > 1:
                     id = arr[len(arr)-2]
                     if objs.has_key(id):
-                        objs[id][pred.encode("utf-8")] = obj.encode("utf-8")
-                        #if pred.encode("utf-8") == u"http://purl.org/dc/terms/identifier":
-                        #    objs[id]["identifier"] = obj.encode("utf-8")
-                        #if pred.encode("utf-8") == u"http://purl.org/dc/terms/title":
-                        #    objs[id]["title"] = obj.encode("utf-8")
-                        #if pred.encode("utf-8") == u"http://purl.org/dc/terms/description":
-                        #    objs[id]["desc"] = obj.encode("utf-8")
+                        #el = {}
+                        #objs[id] = el
+                        #objs[id][pred.encode("utf-8")] = obj.encode("utf-8")
+                        if pred.encode("utf-8") == u"http://purl.org/dc/terms/identifier":
+                            objs[id]["identifier"] = obj.encode("utf-8")
+                        if pred.encode("utf-8") == u"http://purl.org/dc/terms/title":
+                            objs[id]["title"] = obj.encode("utf-8")
+                        if pred.encode("utf-8") == u"http://purl.org/dc/terms/description":
+                            objs[id]["desc"] = obj.encode("utf-8")
+    br = 0
     for o in objs:
-        print o, objs[o]
+        if objs[o]["identifier"].find("http") <> -1 and objs[o].has_key("desc"):
+            print o, objs[o]
+            br += 1
+            tblOds.insert(objs[o])
    
-    print len(obj)
+    print br
 
     '''
     # For each foaf:Person in the store print out its mbox property.
@@ -688,26 +699,51 @@ def createIndexOrg(path, tblOrg):
 
 # create index of searchable sio
 def createIndexSio(path, tblEduMaterials):
-    schema = Schema(name=TEXT(stored=True), link=TEXT(stored=True), level=TEXT(stored=True), grade=TEXT(stored=True), subject=TEXT(stored=True), content=TEXT)
+    schema = Schema(link=TEXT(stored=True), sio_link=TEXT(stored=True), source=TEXT(stored=True), sio_description=TEXT(stored=True), sio_level_desc=TEXT(stored=True), level=TEXT(stored=True), grade=TEXT(stored=True), subject_eng=TEXT(stored=True), subject_slo=TEXT(stored=True), content=TEXT(stored=True))
     index = create_in(path+"whooshindex/sio", schema)
 
     writer = index.writer()
     for sio in tblEduMaterials.all():
-        name = u""
         link = u""
+        sio_link = u""
+        source = u""
+        sio_description = u""
+        sio_level_desc = u""
         level = u""
         grade = u""
-        subject = u""
+        subject_eng = u""
+        subject_slo = u""
         description = u""
         
-        name = sio["name"]
         link = sio["link"]
+        sio_link = sio["sio_link"]
+        source = sio["source"]
+        sio_description = sio["sio_description"]
+        sio_level_desc = sio["sio_level_desc"]
         level = sio["level"]
         grade = sio["grade"]
-        subject = sio["subject"]
+        subject_eng = sio["subject_eng"]
+        subject_slo = sio["subject_slo"]
         description = sio["description"]
-        print name,description 
-        writer.add_document(name=name, link=link, level=level, grade=grade, subject=subject, content=description)
+
+        print sio_description,description 
+        writer.add_document(link=link, sio_link = sio_link, source=source, sio_description=sio_description, sio_level_desc=sio_level_desc, level=level, grade=grade, subject_eng=subject_eng, subject_slo=subject_slo, content=description)
+
+    writer.commit()
+    return index
+
+# create index of searchable ods
+def createIndexOds(path, tblOds):
+    schema = Schema(link=TEXT(stored=True), content=TEXT(stored=True))
+    index = create_in(path+"whooshindex/ods", schema)
+    writer = index.writer()
+    for ods in tblOds.all():
+        link = u""
+        description = u""
+        link = ods["identifier"]
+        description = ods["desc"]
+        print link,description
+        writer.add_document(link=link, content=description)
 
     writer.commit()
     return index
@@ -852,6 +888,9 @@ def loadIndexRsr(path):
 def loadIndexSio(path):
     return windex.open_dir(path+"whooshindex/sio")
 
+def loadIndexOds(path):
+    return windex.open_dir(path+"whooshindex/ods")
+
 def loadIndexRsrKeyws(path):
     return windex.open_dir(path+"whooshindex/rsrkeyws")
 
@@ -911,7 +950,7 @@ def searchIndexSioAdv(index, text):
             add = True
             res = dict(res)
             if arg.has_key("name"):
-                if res["name"] != name:
+                if res["subject_eng"] != name:
                     add = False
             if arg.has_key("grade"):
                 if res["grade"] != grade:
@@ -953,6 +992,32 @@ def getCache(tbl, text):
 # Special constructs
 ########################
 
+#Get unique SIO items
+def getUniqSio():
+    data = tblEduMaterials.all()
+    grades = {}
+    levels = {}
+    names = {}
+    grade = []
+    level = []
+    name = []
+    for d in data:
+        grades[d["grade"]] = 1
+        levels[d["level"]] = 1
+        names[d["subject_eng"]] = 1
+
+    for g in grades:
+        grade.append(g)
+
+    for n in names:
+        name.append(n)
+
+    for l in levels:
+        level.append(l)
+
+    res = {"grades":grade, "names":name, "levels":level}
+    return res
+
 # Create graph based on subset of researchers
 def graphRsrPrj(path, rsrs):
     index = loadIndexRsrRsr(path)
@@ -964,6 +1029,9 @@ def graphRsrPrj(path, rsrs):
 
     edges = []
     print 'length',len(ids)
+    if len(ids) > 360:
+        ids = ids[0:359]
+        print 'length',len(ids)
 
     l = len(ids)
     degree = {}

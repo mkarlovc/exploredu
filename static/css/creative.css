@@ -95,7 +95,7 @@ header {
 header .header-content {
     position: relative;
     width: 100%;
-    padding: 100px 15px;
+    padding: 100px 15px 50px 15px;
     text-align: center;
 }
 header .header-content .header-content-inner h1 {
@@ -167,7 +167,14 @@ header .header-content .header-content-inner p {
     .videolectures .videolectures-caption .videolectures-caption-content .project-category { font-size: 16px;}
     .videolectures .videolectures-caption .videolectures-caption-content .project-name { font-size: 22px; }
 }
-.videolectures .ee-screenshot { width: 100%; height: 400px; background: #ccc; background-position: center-middle; }
+.videolectures .ee-screenshot { width: 100%; height: 350px; background: #ccc; background-position: center-middle; }
+/*	xs cut off	480px
+	sm cut off	768px
+	md cut off	992px
+	lg cut off	1200px */
+@media(min-width:480px) { .videolectures .ee-screenshot { height: 250px; } }
+@media(min-width:992px) { .videolectures .ee-screenshot { height: 250px; } }
+@media(min-width:1200px) { .videolectures .ee-screenshot { height: 300px; } }
 
 .text-primary { color: #f05f40; }
 .no-gutter > [class*=col-] { padding-right: 0; padding-left: 0; }
@@ -345,6 +352,49 @@ body { webkit-tap-highlight-color: #222; }
 i.fa-arrow-right { margin-left: 5px; }
 #rsr { margin-top: 20px; }
 #rsr span { margin: 0 5px; }
+
+.hContainer { height: 200px; padding: 20px 200px 20px 150px; background-color: rgba(39, 34, 40, .7); position: relative; }
+.hContainer .leftArrow, .hContainer .rightArrow { position: absolute; height: 200px; width: 100px; display: block; padding-top: 30px; top: 0; }
+.hContainer .leftArrow:hover, .hContainer .rightArrow:hover { color: #f05f40; }
+.hContainer .leftArrow { left: 100px; }
+.hContainer .rightArrow { right: 20px; }
+.hContainer input {
+	background: none;
+	border: 0px;
+	color: #fff;
+}
+.hNewsBox { width: 100%; overflow:hidden; }
+.hPoliciesBox { width: 100%; overflow:hidden; }
+.hScroll {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	width: 3000px;
+}
+.hScroll li { float: left; width: 300px; padding: 10px; }
+.hScroll a { display: block; padding: 7px 10px; text-decoration: none; }
+.hScroll .newsMeta a { float: none; color: #fff; padding: 0px 10px; }
+.hScroll .newsMeta span { float: none; color: #ccc; padding: 0px 10px; }
+.hScroll .newsTitle { font-size: 90%; }
+.hScroll p { margin-bottom: 5px; }
+.hPolicy { font-size: 90%; padding: 0 10px; }
+.hPolicy a { display: inline; }
+
+.narrowSearchResults { display: none; }
+#advancedSearchMaterials { 
+	margin-top: 20px;
+	display: none;
+}
+.togglesMaterials .btn { background-color: rgba(255, 255, 255, .5); }
+.togglesMaterials .active { background-color: #f05f40; }
+ 
+.counters .text-right { padding-right: 10px; }
+
+.resultMaterials a { display: block; float: left; margin: 0px 20px 15px 0px; }
+.science { color: #333; }
+.field { color: #666; }
+.subfield { color: #999; }
 
 /*
 hex: #442222

@@ -31,7 +31,7 @@ function drawGraph(graph) {
 }
 
 
-function drawGraph1(graph) {
+function drawGraph1(graph, elementId) {
 	var c = new Array();
 	c['-1'] = "#9B9B9B";
 	c['N'] = "#0E53A7"
@@ -49,7 +49,7 @@ function drawGraph1(graph) {
         minNodeSizeVar = 4;
 
     $('#graph').empty();
-    var sigRoot = document.getElementById('graph');
+    var sigRoot = document.getElementById(elementId);
     var sigInst = sigma.init(sigRoot).drawingProperties({
         defaultLabelColor: 'black',
         font: 'Arial',
