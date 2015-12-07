@@ -58,6 +58,9 @@ tblEduMaterials = dbSio.table("materials")
 tblOds = dbSio.table("ods")
 # --- zakoni
 tblZakoni = dbZakoni.table("zakoni")
+# --- oer
+tblOer = dbSio.table("oer")
+
 
 # from sorted dict to dict
 def to_dict(input_ordered_dict):
@@ -544,6 +547,23 @@ def getAllOds(tblOds):
    
     print br
 
+def getAllOer(tblOer):
+    tblOer.purge()
+    f = open('/home/luis/data/mario/oer/oer.pipe.csv', 'r')
+    objs = []
+    for line in f:
+        oer = {}
+        arr =  line.rstrip('\n').split('|')
+        if len(arr) >= 9:
+            oer["link"] = arr[0]
+            oer["title"] = arr[1]
+            oer["img_url"] = arr[3]
+            oer["desc"] = arr[5]
+            oer["meta"] = arr[6]
+            objs.append(oer)
+
+    tblOer.insert_multiple(objs)
+
     '''
     # For each foaf:Person in the store print out its mbox property.
     print("--- printing mboxes ---")
@@ -823,6 +843,23 @@ def createIndexRsrRsr(tblRsrPrjCollW):
     writer.commit()
     return index
 
+def createIndexOer(path, tblOer):
+    schema = Schema(link=TEXT(stored=True), title=TEXT(stored=True), img_url=TEXT(stored=True), desc=TEXT(stored=True), meta=TEXT(stored=True), content=TEXT)
+    index = create_in(path+"whooshindex/oer", schema)
+    writer = index.writer()
+    objs = []
+    for i,oer in enumerate(tblOer.all()):
+        link = oer['link']
+        title = oer['title']
+        img_url = oer['img_url']
+        desc = oer['desc']
+        meta = oer['meta']
+        content = title+' '+desc+' '+meta
+        writer.add_document(link=link, title=title, img_url=img_url, desc=desc, meta=meta, content=content)
+        #objs.push({'link':link, 'title':title, 'img_url':img_url, 'desc':desc, 'meta':meta, 'content':content})
+    writer.commit()
+    return index
+
 # Create connections between researchers and save them into tblRsrPrjColl table of dbNets tinydb database
 def createRsrPrjCollNet():
     tblRsrPrjColl.purge()
@@ -890,6 +927,9 @@ def loadIndexSio(path):
 
 def loadIndexOds(path):
     return windex.open_dir(path+"whooshindex/ods")
+
+def loadIndexOer(path):
+    return windex.open_dir(path+"whooshindex/oer")
 
 def loadIndexRsrKeyws(path):
     return windex.open_dir(path+"whooshindex/rsrkeyws")

@@ -14,6 +14,11 @@ def search():
     #return render_template('search.html')
     return app.send_static_file('index.html')
 
+@app.route('/api')
+def api():
+    #return render_template('search.html')
+    return app.send_static_file('api.html')
+
 @app.route('/search')
 def test():
     return app.send_static_file('search.html')
@@ -105,6 +110,12 @@ def search_rsr(text):
 def search_sio(text):
     index = get_data.loadIndexSio(path)
     print index
+    res = get_data.searchIndex(index, text)
+    return json.dumps(res)
+
+@app.route('/api/oer/<text>', methods=['GET'])
+def serch_oer(text):
+    index = get_data.loadIndexOer(path)
     res = get_data.searchIndex(index, text)
     return json.dumps(res)
 
