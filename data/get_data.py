@@ -21,6 +21,7 @@ from EventRegistry.EventRegistry import *
 from lxml import html
 import requests
 import 	rdflib
+import codecs
 #import wikipedia
 
 # Set main data path
@@ -448,21 +449,40 @@ def getAllEREducationEvents(path):
             pass
 
 def getERNews():
+    # Loading credentials
+    pwd = {}
+    with open('pwd.json') as data_file:
+        pwd = json.load(data_file)
     er = EventRegistry()
+    er.login(pwd['er']['user'], pwd['er']['pass'])
+
     q = QueryArticles()     # we want to make a search for articles
     q.addKeyword("education")       # article should contain word apple
-    q.addKeyword("teaching")      # article should also contain word iphone
-    q.addRequestedResult(RequestArticlesInfo(page=0, count = 30));  # get 30 articles that match the criteria
+    q.addRequestedResult(RequestArticlesInfo(page=0, count = 10));  # get 30 articles that match the criteria
     res = er.execQuery(q)
     return res
 
 def getERNewsRelated(text):
     er = EventRegistry()
+
+    pwd = {}
+    with open('pwd.json') as data_file:
+        pwd = json.load(data_file)
+    er = EventRegistry()
+    er.login(pwd['er']['user'], pwd['er']['pass'])
+
     q = QueryArticles()     # we want to make a search for articles
     q.addKeyword(text)       # article should contain word apple
     q.addRequestedResult(RequestArticlesInfo(page=0, count = 30));  # get 30 articles that match the criteria
     res = er.execQuery(q)
     return res
+
+def getERNewsDefault():
+    #with open('/home/luis/data/mario/er/news.json') as data_file:    
+    #    res = json.load(data_file)
+    data_file = codecs.open('/home/luis/data/mario/er/news.json', encoding='utf-8')
+    text = data_file.read()
+    return json.loads(text, encoding="utf-8")
 
 def getAllSIO():
     page = requests.get('http://portal.sio.si/gradiva')
