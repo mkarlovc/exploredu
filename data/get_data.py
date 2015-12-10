@@ -167,7 +167,7 @@ def getAllRsrPrj(client, path, sessionId, lang, prjs):
     shutil.copyfile(path+'tinydb/sicris.json', path+'tinydb/sicris.json.backup')
     tblRsrPrj.purge()
     totallen = len(prjs.all())
-    print totallen
+    #print totallen
     for i,prj in enumerate(prjs.all()):
         prjid = prj["@id"]
         results = client.service.Retrieve("SI", "RSR", methodCall+prj["@id"]+".RSR", "mstid", sessionId)
@@ -188,7 +188,7 @@ def getAllRsrPrj(client, path, sessionId, lang, prjs):
                 for rsr in rsrs:
                     #if isinstance(rsr, dict):
                     tblRsrPrj.insert({'prjid': prjid, 'rsrmstid': rsr['@mstid'] })
-        print i, totallen
+        #print i, totallen
 
 # Get projects of researchers
 def getAllPrjRsr(client, path, sessionId, lang, rsrs):
@@ -196,11 +196,11 @@ def getAllPrjRsr(client, path, sessionId, lang, rsrs):
     shutil.copyfile(path+'tinydb/sicris.json', path+'tinydb/sicris.json.backup')
     tblRsrPrj.purge()
     totallen = len(rsrs.all())
-    print totallen
+    #print totallen
     for i,rsr in enumerate(rsrs.all()):
         rsrid = rsr["@id"]
         call = methodCall+rsr["@id"]
-        print call
+        #print call
         results = client.service.Retrieve("SI", "PRJ", call,"", sessionId)
         res = results.Records
         obj = {}
@@ -219,9 +219,9 @@ def getAllPrjRsr(client, path, sessionId, lang, rsrs):
                 for prj in prjs:
                     if isinstance(prj, dict):
                         if (prj.has_key('@mstid')):
-                            print {'prjmstid': prj['@mstid'], 'rsrid': rsrid, 'prjid:':prj['@id']}
+                            #print {'prjmstid': prj['@mstid'], 'rsrid': rsrid, 'prjid:':prj['@id']}
                             tblRsrPrj.insert({'prjmstid': prj['@mstid'], 'prjid:':prj['@id'], 'rsrid': rsrid })
-        print i, totallen
+        #print i, totallen
 
 # Get all sicris projects
 def getAllPrj(client, path, sessionId, lang):
@@ -239,7 +239,7 @@ def getAllPrj(client, path, sessionId, lang):
         pass
 
     for i,prj in enumerate(obj['CRIS_RECORDS']['PRJ']):
-        print i,len(obj['CRIS_RECORDS']['PRJ'])
+        #print i,len(obj['CRIS_RECORDS']['PRJ'])
         tblPrj.insert(to_dict(prj))
 
 # Gett project abstract and keywords
@@ -326,7 +326,7 @@ def getAllPrjDetails(client, path, sessionId, lang, prjs):
         if bool(keyws) or bool(abst) or bool(sign_dom) or bool(sign_world):
             tblPrj.update(old, where('@id') == prj["@id"])
         
-        print i
+        #print i
 
 # Get all organization using IZUM webcris service and store it into tblOrg table of sicris tinydb database
 def getAllOrg(client, path, sessionId, lang):
@@ -343,7 +343,7 @@ def getAllOrg(client, path, sessionId, lang):
         pass
 
     for i,org in enumerate(obj['CRIS_RECORDS']['ORG']):
-        print i,len(obj['CRIS_RECORDS']['ORG'])
+        #print i,len(obj['CRIS_RECORDS']['ORG'])
         tblOrg.insert(to_dict(org))
 
 # Get details of organizatipon using IZUM webcris service. Use the existing list of organizations from tblOrg table
@@ -405,7 +405,7 @@ def getAllOrgDetails(client, path, sessionId, lang, orgs):
             old['classification'] = classi
         # overwrite
         tblOrg.update(old, where('@id') == org["@id"])
-        print i
+        #print i
 
 # get all videolecturs
 def getAllVideoLectures(client, path):
@@ -415,8 +415,8 @@ def getAllVideoLectures(client, path):
     length = len(lectures)
     for i,l in enumerate(lectures):
         tblLec.insert(lectures[l])
-        if i%10000 == 0:
-            print i
+        #if i%10000 == 0:
+        #    print i
 
 # get event registry events with concept Education
 def getAllEREducationEvents(path):
@@ -443,7 +443,7 @@ def getAllEREducationEvents(path):
             out['date'] =  eventRes[uri][u'info'][u'eventDate']
             out['uri'] = uri
             tblEvents.insert(out)
-            print i,l
+            #print i,l
         except:
             pass
 
@@ -488,7 +488,7 @@ def getAllSioFile():
             mat["subject_eng"] = arr[8]
             mat["description"] = arr[9]
             #mat["edu_content"] = arr[10]
-            print mat
+            #print mat
             tblEduMaterials.insert(mat)
 
 def getAllZakoni():
@@ -497,7 +497,7 @@ def getAllZakoni():
     with open(f) as data_file: 
         data = json.load(data_file)
         for i,d in enumerate(data["zakoni"]):
-            print i,d
+            #print i,d
             tblZakoni.insert(d)
    
 
@@ -506,7 +506,7 @@ def getAllOds(tblOds):
     f = open('/home/luis/data/mario/ods/ods.ttl', 'r')
     g = rdflib.Graph()
     result = g.parse(f, format='n3')
-    print len(g)
+    #print len(g)
 
     objs = {}
 
@@ -518,7 +518,7 @@ def getAllOds(tblOds):
                 arr = subj.encode("utf-8").split("_")
                 if len(arr) > 1:
                     objs[arr[len(arr)-2]] = {}
-    print len(objs)
+    #print len(objs)
 
     for subj, pred, obj in g:
         if (subj, pred, obj) not in g:
@@ -541,11 +541,11 @@ def getAllOds(tblOds):
     br = 0
     for o in objs:
         if objs[o]["identifier"].find("http") <> -1 and objs[o].has_key("desc"):
-            print o, objs[o]
+            #print o, objs[o]
             br += 1
             tblOds.insert(objs[o])
    
-    print br
+    #print br
 
 def getAllOer(tblOer):
     tblOer.purge()
@@ -962,6 +962,26 @@ def searchIndex(index, text):
             out.append(dict(res))
     return out
 
+def searchIndexLimitedDef(index, text, limit):
+    out = []
+    with index.searcher() as searcher:
+        parser = QueryParser("content", index.schema)
+        myquery = parser.parse(text)
+        results = searcher.search(myquery, limit=limit)
+        for res in results:
+            out.append(dict(res))
+    return out
+
+def searchIndexLimited(index, text, limit):
+    out = []
+    with index.searcher() as searcher:
+        parser = QueryParser("content", index.schema)
+        myquery = parser.parse(text)
+        results = searcher.search(myquery, limit=None)
+        for res in results[0:limit]:
+            out.append(dict(res))
+    return out, len(results)
+
 def searchIndexSioAdv(index, text):
     out = []
     arg = json.loads(text)
@@ -1134,7 +1154,7 @@ def getPrjHistogram(prjs):
 def getRelatedKeywsRelRsr(rsrs):
     hist = {}
     for i,rsr in enumerate(rsrs):
-        print rsr
+        #/print rsr
         if rsr.has_key('keyws_en'):
             keyws = re.split('; |, |;|,|\*|\n', rsr['keyws_en'])
             for keyw in keyws:

@@ -59,8 +59,89 @@ def search_all(text):
 
     # projects histogram
     hist = get_data.getPrjHistogram(prj)
+    
+    # legislation
+    zakoni = get_data.searchAllZakoni()
 
-    return json.dumps({'rsr': rsr, 'prj':prj, 'lec':lec, 'graph':graph, 'hist': hist})
+    # ods
+    indexods = get_data.loadIndexOds(path)
+    ods = get_data.searchIndex(indexods, text)
+
+    # sio
+    indexsio = get_data.loadIndexSio(path)
+    sio = get_data.searchIndex(indexsio, text)
+    
+    # sio categories
+    sio_cat = get_data.getUniqSio()
+
+    # er
+    ernews = get_data.getERNewsRelated(text)    
+
+    # oer
+    indexoer = get_data.loadIndexOer(path)
+    oer = get_data.searchIndex(indexoer, text)
+
+    # keyws
+    keyws = get_data.getRelatedKeywsRelRsr(rsr)
+
+    return json.dumps({'keyws': keyws, 'oer': oer, 'ernews': ernews, 'sio': sio, 'sio_cat': sio_cat, 'ods': ods, 'zakoni': zakoni, 'rsr': rsr, 'prj':prj, 'lec':lec, 'graph':graph, 'hist': hist})
+
+@app.route('/api/all_all/<text>/<limit>', methods=['GET'])
+def search_all_limited(text, limit):
+    limit = int(limit)
+
+    # researchers
+    indexrsr = get_data.loadIndexRsr(path)
+    rsr = get_data.searchIndex(indexrsr, text)
+
+    # projects
+    indexprj = get_data.loadIndexPrj(path)
+    prj = get_data.searchIndexLimited(indexprj, text, limit)
+
+    # lectures
+    indexlec = get_data.loadIndexLec(path)
+    lec = get_data.searchIndexLimited(indexlec, text, limit)
+
+    # researchers projects collaboration graph
+    graph = []
+    cache = get_data.getCache(get_data.tblRsrPrjGraphCache, text)
+    if len(cache) > 0:
+        graph = cache[0]['res']
+    else:
+        index = get_data.loadIndexRsr(path)
+        rsrs = get_data.searchIndex(index, text)
+        res = get_data.graphRsrPrj(path, rsrs)
+        get_data.tblRsrPrjGraphCache.insert({'query': text, 'res':res})
+        graph = res
+
+    # projects histogram
+    # hist = get_data.getPrjHistogram(prj)
+
+    # legislation
+    zakoni = get_data.searchAllZakoni()
+
+    # ods
+    indexods = get_data.loadIndexOds(path)
+    ods = get_data.searchIndexLimited(indexods, text, limit)
+
+    # sio
+    indexsio = get_data.loadIndexSio(path)
+    sio = get_data.searchIndexLimited(indexsio, text, limit)
+
+    # sio categories
+    sio_cat = get_data.getUniqSio()
+
+    # er
+    ernews = get_data.getERNewsRelated(text)
+
+    # oer
+    indexoer = get_data.loadIndexOer(path)
+    oer = get_data.searchIndexLimited(indexoer, text, limit)
+
+    # keyws
+    keyws = get_data.getRelatedKeywsRelRsr(rsr)
+
+    return json.dumps({'keyws': keyws, 'oer': oer[0], 'oer_count':oer[1], 'ernews': ernews, 'sio': sio[0], 'sio_count':sio[1], 'sio_cat': sio_cat, 'ods': ods[0], 'ods_count':ods[1], 'zakoni': zakoni, 'rsr': rsr, 'rsr_count': len(rsr), 'prj':prj[0], 'prj_count':prj[1], 'lec':lec[0], 'lec_count':lec[1], 'graph':graph})
 
 @app.route('/api/zakoni/all', methods=['GET'])
 def get_zakoni_all():
@@ -109,7 +190,6 @@ def search_rsr(text):
 @app.route('/api/sio/<text>', methods=['GET'])
 def search_sio(text):
     index = get_data.loadIndexSio(path)
-    print index
     res = get_data.searchIndex(index, text)
     return json.dumps(res)
 
